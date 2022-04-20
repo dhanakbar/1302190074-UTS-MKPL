@@ -5,102 +5,68 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Employee {
+public class Employee extends Salary{
 	private String employeeId;
+	
 
-	//Person
-	private String firstName;
-	private String lastName;
-	private String idNumber;
-	private String address;
+	Person person;
+	EntryJob entryJob;
+	Passport passport;
+	Salary salary;
+	Status status;
 	
-	//EntryJob
-	private LocalDate entryDate;
-	private int monthWorkingInYear;
-	
-	private boolean isForeigner;
-	private enum Gender{LAKI_LAKI, PEREMPUAN}; //true = Laki-laki, false = Perempuan
-	private String gender;
-
-	//Salary
-	private int monthlySalary;
-	private int otherMonthlyIncome;
-	private int annualDeductible;
-	
-	//Status
-	private String spouseName;
-	private String spouseIdNumber;
-
-	private List<String> childNames;
-	private List<String> childIdNumbers;
-	
-	public Employee(String employeeId, String firstName, String lastName, String idNumber, String address, int yearJoined, int monthJoined, int dayJoined, boolean isForeigner, boolean gender) {
+	public Employee(String employeeId, String fullName, String idNumber, String address, String entryDate, boolean isForeigner, boolean gender) {
 		this.employeeId = employeeId;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.idNumber = idNumber;
-		this.address = address;
-		this.entryDate = LocalDate.parse(yearJoined+"-"+monthJoined+"-"+dayJoined, DateTimeFormatter.ofPattern("yyyy-mm-dd"));
-		this.isForeigner = isForeigner;
-		this.gender = gender? Gender.LAKI_LAKI.toString() : Gender.PEREMPUAN.toString();
-		
-		childNames = new LinkedList<String>();
-		childIdNumbers = new LinkedList<String>();
+		this.person.setFullName(fullName);
+		this.person.setAddress(address);
+		this.person.setIdNumber(idNumber);
+		this.entryJob.setEntryDate(LocalDate.parse(entryDate, DateTimeFormatter.ofPattern("yyyy-mm-dd")));;
+		this.passport.setIsForeigner(isForeigner);
+		this.passport.setGender(gender);
+		this.status.setChildNames(new LinkedList<String>());
+		this.status.setChildIdNumbers(new LinkedList<String>());
 	}
-	
-	/**
-	 * Fungsi untuk menentukan gaji bulanan pegawai berdasarkan grade kepegawaiannya (grade 1: 3.000.000 per bulan, grade 2: 5.000.000 per bulan, grade 3: 7.000.000 per bulan)
-	 * Jika pegawai adalah warga negara asing gaji bulanan diperbesar sebanyak 50%
-	 */
 	
 	public void setMonthlySalary(int grade) {	
 		if (grade == 1) {
-			monthlySalary = 3000000;
-			if (isForeigner) {
-				monthlySalary = (int) (3000000 * 1.5);
+			salary.setMonthlySalary(3000000);
+			if (passport.isIsForeigner()) {
+				this.salary.setMonthlySalary((int) (3000000 * 1.5));
 			}
 		}else if (grade == 2) {
-			monthlySalary = 5000000;
-			if (isForeigner) {
-				monthlySalary = (int) (3000000 * 1.5);
+			this.salary.setMonthlySalary(5000000);
+			if (passport.isIsForeigner()) {
+				this.salary.setMonthlySalary((int) (5000000 * 1.5));
 			}
 		}else if (grade == 3) {
-			monthlySalary = 7000000;
-			if (isForeigner) {
-				monthlySalary = (int) (3000000 * 1.5);
+			salary.setMonthlySalary(7000000);
+			if (passport.isIsForeigner()) {
+				this.salary.setMonthlySalary((int) (7000000 * 1.5));
 			}
 		}
-	}
-	
-	public void setAnnualDeductible(int deductible) {	
-		this.annualDeductible = deductible;
-	}
-	
-	public void setAdditionalIncome(int income) {	
-		this.otherMonthlyIncome = income;
 	}
 	
 	public void setSpouse(String spouseName, String spouseIdNumber) {
-		this.spouseName = spouseName;
-		this.spouseIdNumber = idNumber;
+		this.status.setSpouseName(spouseName);
+		Person spouse = new Person();
+		spouse.setIdNumber(spouseIdNumber);
+		this.status.setSpouseIdNumber(spouse.getIdNumber());
 	}
 	
 	public void addChild(String childName, String childIdNumber) {
-		childNames.add(childName);
-		childIdNumbers.add(childIdNumber);
+		this.status.getChildNames().add(childName);
+		this.status.getChildIdNumbers().add(childIdNumber);
 	}
 	
 	public int getAnnualIncomeTax() {
-		
-		//Menghitung berapa lama pegawai bekerja dalam setahun ini, jika pegawai sudah bekerja dari tahun sebelumnya maka otomatis dianggap 12 bulan.
 		LocalDate date = LocalDate.now();
 		
-		if (date.getYear() == entryDate.getYear()) {
-			monthWorkingInYear = date.getMonthValue() - entryDate.getMonthValue();
+		if (date.getYear() == entryJob.getEntryDate().getYear()) {
+			this.entryJob.setMonthWorkingInYear(date.getMonthValue() - this.entryJob.getEntryDate().getMonthValue());
 		}else {
-			monthWorkingInYear = 12;
+			this.entryJob.setMonthWorkingInYear(12);
 		}
-		
-		return TaxFunction.calculateTax(monthlySalary, otherMonthlyIncome, monthWorkingInYear, annualDeductible, spouseIdNumber.equals(""), childIdNumbers.size());
+	
+		return TaxFunction.calculateTax(salary.getMonthlySalary(), salary,getAdditionalIncome(), entryJob.getMonthWorkingInYear(), salary.getAnnualDeductible(), status.getSpouseIdNumber().equals(""), status.getChildIdNumbers().size());
 	}
 }
