@@ -1,30 +1,33 @@
 package lib;
 
 import java.time.LocalDate;
-import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 
 public class Employee {
-
 	private String employeeId;
+
+	//Person
 	private String firstName;
 	private String lastName;
 	private String idNumber;
 	private String address;
 	
-	private int yearJoined;
-	private int monthJoined;
-	private int dayJoined;
+	//EntryJob
+	private LocalDate entryDate;
 	private int monthWorkingInYear;
 	
 	private boolean isForeigner;
-	private boolean gender; //true = Laki-laki, false = Perempuan
-	
+	private enum Gender{LAKI_LAKI, PEREMPUAN}; //true = Laki-laki, false = Perempuan
+	private String gender;
+
+	//Salary
 	private int monthlySalary;
 	private int otherMonthlyIncome;
 	private int annualDeductible;
 	
+	//Status
 	private String spouseName;
 	private String spouseIdNumber;
 
@@ -37,11 +40,9 @@ public class Employee {
 		this.lastName = lastName;
 		this.idNumber = idNumber;
 		this.address = address;
-		this.yearJoined = yearJoined;
-		this.monthJoined = monthJoined;
-		this.dayJoined = dayJoined;
+		this.entryDate = LocalDate.parse(yearJoined+"-"+monthJoined+"-"+dayJoined, DateTimeFormatter.ofPattern("yyyy-mm-dd"));
 		this.isForeigner = isForeigner;
-		this.gender = gender;
+		this.gender = gender? Gender.LAKI_LAKI.toString() : Gender.PEREMPUAN.toString();
 		
 		childNames = new LinkedList<String>();
 		childIdNumbers = new LinkedList<String>();
@@ -94,8 +95,8 @@ public class Employee {
 		//Menghitung berapa lama pegawai bekerja dalam setahun ini, jika pegawai sudah bekerja dari tahun sebelumnya maka otomatis dianggap 12 bulan.
 		LocalDate date = LocalDate.now();
 		
-		if (date.getYear() == yearJoined) {
-			monthWorkingInYear = date.getMonthValue() - monthJoined;
+		if (date.getYear() == entryDate.getYear()) {
+			monthWorkingInYear = date.getMonthValue() - entryDate.getMonthValue();
 		}else {
 			monthWorkingInYear = 12;
 		}
